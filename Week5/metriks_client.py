@@ -46,12 +46,11 @@ class Client:
         mdict = {}
         try:
             self.sock.sendall(("get " + key + "\n").encode("utf8"))
-            while True:
-                data = self.sock.recv(1024)
-                if data == b"ok\n\n":
-                    return mdict
-                mdict = self.parse(data.decode("utf8"))
+            data = self.sock.recv(1024)
+            if data == b"ok\n\n":
                 return mdict
+            mdict = self.parse(data.decode("utf8"))
+            return mdict
         except socket.error as ex:
             raise ClientError(ex)
         except IndexError as ex:
@@ -69,7 +68,13 @@ class Client:
                 mdict[line[0]] = [(int(line[2]), float(line[1]))]
         return mdict
 
-# client = Client("127.0.0.1", 10000, timeout=2)
+client = Client("127.0.0.1", 10000, timeout=5)
+client.put("test", 0.5, timestamp=1)
+client.put("test", 2.0, timestamp=2)
+client.put("test", 0.5, timestamp=3)
+client.put("load", 3, timestamp=4)
+client.put("load", 4, timestamp=5)
+print(client.get("test"))
 # md = {}
 # print(client.get("*"))
 # print(md.get(13))
